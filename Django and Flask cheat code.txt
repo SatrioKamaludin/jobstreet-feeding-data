@@ -1,0 +1,5 @@
+Django: https://www.youtube.com/watch?v=f1NQnhFFV-E
+
+- djangoenv\Scripts\activate
+
+Flask: https://www.youtube.com/watch?v=2Uatl8Fw4QQ
