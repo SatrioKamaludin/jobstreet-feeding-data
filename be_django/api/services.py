@@ -1,11 +1,19 @@
+import json
+import re
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 import math
 import xlwt
+import random
+import requests
+from bs4 import BeautifulSoup
 from io import BytesIO
+from datetime import datetime
 from django.http import HttpResponse
 from django.db.models import Q
+from django.utils.dateparse import parse_datetime
+from faker import Faker
 from .models import Jobs
 from .serializers import JobsSerializer, JobsUpdateSerializer
 
@@ -103,6 +111,73 @@ def delete_job(job_id):
     return Response({
         'message': f'Job {job_id} deleted successfully.'
     }, status=status.HTTP_200_OK)
+
+def fetch_page_data(page, keyword, location):
+    url = f"https://id.jobstreet.com/id/{keyword}-jobs/in-{location}?page={page}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        script = soup.find('script', text=re.compile('window.SEEK_REDUX_DATA'))
+        if script:
+            json_text = re.search(r'window\.SEEK_REDUX_DATA\s*=\s*(\{.*\});', script.string).group(1)
+            return json.loads(json_text)
+    except (requests.RequestException, AttributeError, json.JSONDecodeError):
+        return None
+    
+def scrape_jobs(keyword, location):
+    data_per_page = 32  # assuming each page contains 32 job listings
+    total_jobs = []
+    
+    # Fetch data for the first page to calculate max_pages
+    data = fetch_page_data(1, keyword, location)
+    if data:
+        total_data = int(data['results']['results']['summary']['displayTotalCount'].replace(",", ""))
+        max_pages = math.ceil(total_data / data_per_page)
+    else:
+        return []
+    
+    for page in range(1, max_pages + 1):
+        data = fetch_page_data(page, keyword, location)
+        if data:
+            jobs = data['results']['results']['jobs']
+            for job in jobs:
+                title = job.get('title', 'No Title')
+                company_name = job.get('advertiser', {}).get('description', 'No Company Name')
+                location = job.get('location', 'No Location')
+                listing_date = job.get('listingDate', 'No Listing Date')
+                salary = job.get('salary', 'No Salary')
+                work_type = job.get('workType', 'No Work Type')
+                
+                if listing_date != 'No Listing Date':
+                    try:
+                        listing_date_obj = datetime.strptime(listing_date, "%Y-%m-%dT%H:%M:%SZ")
+                        formatted_date = listing_date_obj.strftime("%Y-%m-%d")
+                    except ValueError:
+                        formatted_date = 'Invalid Date Format'
+                else:
+                    formatted_date = 'No Listing Date'
+                    
+                Jobs.objects.update_or_create(
+                    title=title,
+                    company_name=company_name,
+                    keyword=keyword,  
+                    defaults={
+                        'work_type': work_type,
+                        'location': location,
+                        'salary': salary,
+                        'listing_date': formatted_date
+                    }
+                )
+                total_jobs.append({
+                    'title': title,
+                    'company_name': company_name,
+                    'location': location,
+                    'listing_date': formatted_date,
+                    'salary': salary,
+                    'work_type': work_type,
+                })
+    return total_jobs
 
 def export_jobs_to_excel():
     # Create a workbook and add a worksheet
