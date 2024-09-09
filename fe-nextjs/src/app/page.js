@@ -1,58 +1,32 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
-import Header from "./components/Header";
+import { useEffect, useMemo, useState } from 'react';
+import { getJobs } from './api/api';
+import Header from './components/Header';
+import { format } from 'date-fns';
 
 export default function Home() {
-  const jobs = [
-    {
-      title: "Software Engineer",
-      company_name: "Tech Solutions",
-      work_type: "Full-time",
-      location: "Remote",
-      salary: "$120,000/year",
-      listing_date: "2023-09-01",
-      keyword: "software, engineer, remote"
-    },
-    {
-      title: "Product Manager",
-      company_name: "Innovative Labs",
-      work_type: "Contract",
-      location: "New York, NY",
-      salary: "$90,000/year",
-      listing_date: "2023-08-25",
-      keyword: "product, manager, innovation"
-    },
-    {
-      title: "Data Scientist",
-      company_name: "Data Corp",
-      work_type: "Part-time",
-      location: "San Francisco, CA",
-      salary: "$110,000/year",
-      listing_date: "2023-09-03",
-      keyword: "data, scientist, analysis"
-    },
-    // Add more job data as needed
-  ];
-
-  const [itemsPerPage, setItemsPerPage] = useState(5); // Number of items per page
+  const [jobs, setJobs] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
-  const [formattedJobs, setFormattedJobs] = useState([]);
-  const totalPages = Math.ceil(jobs.length / itemsPerPage);
-
-  // Get current items for the current page
-  const currentJobs = useMemo(() => jobs.slice((currentPage - 1)*itemsPerPage, currentPage * itemsPerPage), [currentPage, itemsPerPage]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    setFormattedJobs(
-      currentJobs.map((job) => ({
-        ...job,
-        listing_date: format(new Date(job.listing_date), "yyyy-MM-dd"),
-      }))
-    )
-  }, [currentJobs]);
+    const fetchJobs = async () => {
+      try {
+        const data = await getJobs(currentPage, itemsPerPage, search);
+        setJobs(data.results);
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+    fetchJobs();
+  }, [currentPage, itemsPerPage, search]);
 
-  // Handle page change
+  const currentJobs = useMemo(() => jobs, [jobs]);
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -62,28 +36,79 @@ export default function Home() {
     setCurrentPage(1);
   }
 
+  const handleSearchInputChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearchClick = () => {
+    setSearch(searchTerm);
+    setCurrentPage(1); // Reset to the first page when searching
+  };
+
+  const generatePaginationButtons = () => {
+    const pages = [];
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    // Adjust the start and end page if the number of pages is less than 5
+    if (totalPages <= 5) {
+      startPage = 1;
+      endPage = totalPages;
+    } else {
+      if (currentPage <= 3) {
+        endPage = 5;
+      }
+      if (currentPage >= totalPages - 2) {
+        startPage = totalPages - 4;
+      }
+    }
+
+    for (let page = startPage; page <= endPage; page++) {
+      pages.push(page);
+    }
+
+    return pages;
+  };
+
+  const paginationButtons = generatePaginationButtons();
+
   return (
     <>
-      <div className="flex flex-col it
-      
-      ems-center justify-center min-h-screen bg-gray-100">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
         {/* Render HeaderMenu component */}
         <Header />
 
         <main className="flex-grow container mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Job Listings</h1>
 
-          <div className="flex justify-center mb-6">
-            <label className="mr-2 text-gray-800 items-center flex">Items per page:</label>
-            <select 
-              value={itemsPerPage}
-              onChange={handleItemsPerPageChange}
-              className="border border-gray-300 text-gray-800 rounded-md px-4 py-2"
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-            </select>
+          <div className="flex items-center justify-center space-x-2 mb-6">
+            <div className="flex items-center space-x-2 w-full md:w-1/3">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={handleSearchInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                onClick={handleSearchClick}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                Search
+              </button>
+            </div>
+            <div className="flex items-center space-x-2 w-full md:w-1/3">
+              <label className="text-gray-800">Items per page:</label>
+              <select
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                className="border border-gray-300 text-gray-800 rounded-md px-4 py-2"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+              </select>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -101,7 +126,7 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody className="text-gray-900">
-                {jobs.map((job, index) => (
+                {currentJobs.map((job, index) => (
                   <tr key={index} className="border-b">
                     <td className="py-2 px-4">{job.title}</td>
                     <td className="py-2 px-4">{job.company_name}</td>
@@ -133,15 +158,41 @@ export default function Home() {
               >
                 Previous
               </button>
-              {Array.from({ length: totalPages }, (_, i) => (
+              {paginationButtons.includes(1) && (
                 <button
-                  key={i + 1}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
+                  onClick={() => handlePageChange(1)}
+                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === 1 ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
                 >
-                  {i + 1}
+                  1
+                </button>
+              )}
+              {paginationButtons.length > 1 && paginationButtons[0] > 2 && (
+                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
+                  ...
+                </span>
+              )}
+              {paginationButtons.slice(1, -1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
+                >
+                  {page}
                 </button>
               ))}
+              {paginationButtons.length > 1 && paginationButtons[paginationButtons.length - 1] < totalPages - 1 && (
+                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
+                  ...
+                </span>
+              )}
+              {paginationButtons.includes(totalPages) && (
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
+                >
+                  {totalPages}
+                </button>
+              )}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
