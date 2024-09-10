@@ -72,22 +72,6 @@ export default function Home() {
     setShowUpdateModal(false);
   };
 
-  const handleJobAdd = async () => {
-    try {
-      await fetchJobs();
-    } catch (error) {
-      console.error("Error adding job:", error);
-    }
-  }
-
-  const handleJobUpdate = async () => {
-    try {
-      await fetchJobs();
-    } catch (error) {
-      console.error("Error updating job:", error);
-    }
-  }
-
   const handleDeleteClick = (job) => {
     setJobToDelete(job);
   };
@@ -95,10 +79,6 @@ export default function Home() {
   const handleDeleteModalClose = () => {
     setJobToDelete(null);
   };
-
-  const handleDeleteSuccess = () => {
-    fetchJobs();
-  }
 
   const generatePaginationButtons = () => {
     const pages = [];
@@ -183,7 +163,7 @@ export default function Home() {
           </div>
 
           {showAddModal && (
-            <AddModal onClose={handleAddModalClose} onAddSuccess={handleJobAdd} />
+            <AddModal onClose={handleAddModalClose} onAddSuccess={fetchJobs} />
           )}
 
           <div className="overflow-x-auto">
@@ -230,14 +210,14 @@ export default function Home() {
                   <DeleteModal
                     job={jobToDelete}
                     onClose={handleDeleteModalClose}
-                    onDeleteSuccess={handleDeleteSuccess}
+                    onDeleteSuccess={fetchJobs}
                   />
                 )}
                 {showUpdateModal && (
                   <UpdateModal
                     job={jobToUpdate}
                     onClose={handleUpdateModalClose}
-                    onUpdateSuccess={handleJobUpdate}
+                    onUpdateSuccess={fetchJobs}
                   />
                 )}
               </tbody>
