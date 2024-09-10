@@ -3,6 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { getJobs } from './api/api';
 import Header from './components/Header';
 import { format } from 'date-fns';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import DeleteModal from './components/DeleteModal';
+import UpdateModal from './components/UpdateModal';
+import AddModal from './components/AddModal';
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
@@ -11,17 +16,22 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [search, setSearch] = useState('');
+  const [jobToDelete, setJobToDelete] = useState(null);
+  const [jobToUpdate, setJobToUpdate] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const fetchJobs = async () => {
+    try {
+      const data = await getJobs(currentPage, itemsPerPage, search);
+      setJobs(data.results);
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const data = await getJobs(currentPage, itemsPerPage, search);
-        setJobs(data.results);
-        setTotalPages(data.totalPages);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      }
-    };
     fetchJobs();
   }, [currentPage, itemsPerPage, search]);
 
@@ -44,6 +54,51 @@ export default function Home() {
     setSearch(searchTerm);
     setCurrentPage(1); // Reset to the first page when searching
   };
+
+  const handleAddClick = () => {
+    setShowAddModal(true);
+  };
+
+  const handleAddModalClose = () => {
+    setShowAddModal(false);
+  };
+
+  const handleUpdateClick = (job) => {
+    setJobToUpdate(job);
+    setShowUpdateModal(true);
+  };
+
+  const handleUpdateModalClose = () => {
+    setShowUpdateModal(false);
+  };
+
+  const handleJobAdd = async () => {
+    try {
+      await fetchJobs();
+    } catch (error) {
+      console.error("Error adding job:", error);
+    }
+  }
+
+  const handleJobUpdate = async () => {
+    try {
+      await fetchJobs();
+    } catch (error) {
+      console.error("Error updating job:", error);
+    }
+  }
+
+  const handleDeleteClick = (job) => {
+    setJobToDelete(job);
+  };
+
+  const handleDeleteModalClose = () => {
+    setJobToDelete(null);
+  };
+
+  const handleDeleteSuccess = () => {
+    fetchJobs();
+  }
 
   const generatePaginationButtons = () => {
     const pages = [];
@@ -76,13 +131,14 @@ export default function Home() {
     <>
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
         {/* Render HeaderMenu component */}
-        <Header />
+        {/* <Header /> */}
 
         <main className="flex-grow container mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Job Listings</h1>
 
-          <div className="flex items-center justify-center space-x-2 mb-6">
-            <div className="flex items-center space-x-2 w-full md:w-1/3">
+          {/* Search and Items Per Page */}
+          <div className="flex flex-col items-center space-y-4 mb-6 w-full">
+            <div className="flex items-center space-x-2">
               <input
                 type="text"
                 placeholder="Search..."
@@ -97,7 +153,7 @@ export default function Home() {
                 Search
               </button>
             </div>
-            <div className="flex items-center space-x-2 w-full md:w-1/3">
+            <div className="flex items-center space-x-2">
               <label className="text-gray-800">Items per page:</label>
               <select
                 value={itemsPerPage}
@@ -110,6 +166,25 @@ export default function Home() {
               </select>
             </div>
           </div>
+
+          <div className="flex justify-center space-x-4 mb-6">
+            <button
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+              onClick={handleAddClick}
+            >
+              + Add Jobs
+            </button>
+            <button className="bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600">
+              Scrape from Jobstreet
+            </button>
+            <button className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+              Export
+            </button>
+          </div>
+
+          {showAddModal && (
+            <AddModal onClose={handleAddModalClose} onAddSuccess={handleJobAdd} />
+          )}
 
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden text-gray-900">
@@ -135,16 +210,36 @@ export default function Home() {
                     <td className="py-2 px-4">{job.salary}</td>
                     <td className="py-2 px-4">{format(new Date(job.listing_date), 'yyyy-MM-dd')}</td>
                     <td className="py-2 px-4">{job.keyword}</td>
-                    <td className="py-2 px-4">
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                        Update
+                    <td className="py-2 px-4 flex">
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        onClick={() => handleUpdateClick(job)}
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
                       </button>
-                      <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 ml-2">
-                        Delete
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 ml-2"
+                        onClick={() => handleDeleteClick(job)}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </td>
                   </tr>
                 ))}
+                {jobToDelete && (
+                  <DeleteModal
+                    job={jobToDelete}
+                    onClose={handleDeleteModalClose}
+                    onDeleteSuccess={handleDeleteSuccess}
+                  />
+                )}
+                {showUpdateModal && (
+                  <UpdateModal
+                    job={jobToUpdate}
+                    onClose={handleUpdateModalClose}
+                    onUpdateSuccess={handleJobUpdate}
+                  />
+                )}
               </tbody>
             </table>
           </div>

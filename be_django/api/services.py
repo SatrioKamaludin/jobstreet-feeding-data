@@ -103,6 +103,9 @@ def delete_job(job_id):
     except Jobs.DoesNotExist:
         return Response({'error': 'Job not found.'}, status=status.HTTP_404_NOT_FOUND)
     
+    if job.is_deleted:
+        return Response({'error': 'Job is already deleted.'}, status=status.HTTP_400_BAD_REQUEST)
+    
     job.is_deleted = True
     job.save()
     

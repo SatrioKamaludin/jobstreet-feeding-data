@@ -9,7 +9,6 @@ export default function Header() {
         downloadFile();
     };
 
-
     return (
         <header className="w-full bg-slate-50">
             <div className="container mx-auto px-4 py-4 flex gap-5 justify-center">
@@ -28,6 +27,11 @@ export default function Header() {
                 {/* Add Jobs Button */}
                 <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
                     + Add Jobs
+                </button>
+
+                {/* Scrape Button */}
+                <button className="bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600">
+                    Scrape from Jobstreet
                 </button>
 
                 {/* Export Button */}
