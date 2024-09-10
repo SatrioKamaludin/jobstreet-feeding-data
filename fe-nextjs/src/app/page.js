@@ -1,13 +1,11 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
-import { getJobs } from './api/api';
+import { downloadFile, getJobs } from './api/api';
 import Header from './components/Header';
-import { format } from 'date-fns';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
-import DeleteModal from './components/DeleteModal';
-import UpdateModal from './components/UpdateModal';
 import AddModal from './components/AddModal';
+import Pagination from './components/Pagination';
+import JobTable from './components/JobTable';
+import ScrapeModal from './components/ScrapeModal';
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
@@ -20,6 +18,7 @@ export default function Home() {
   const [jobToUpdate, setJobToUpdate] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showScrapeModal, setShowScrapeModal] = useState(false);
 
   const fetchJobs = async () => {
     try {
@@ -63,6 +62,18 @@ export default function Home() {
     setShowAddModal(false);
   };
 
+  const handleScrapeClick = () => {
+    setShowScrapeModal(true);
+  };
+
+  const handleScrapeModalClose = () => {
+    setShowScrapeModal(false);
+  };
+
+  const handleExportClick = () => {
+    downloadFile();
+  };
+
   const handleUpdateClick = (job) => {
     setJobToUpdate(job);
     setShowUpdateModal(true);
@@ -79,33 +90,6 @@ export default function Home() {
   const handleDeleteModalClose = () => {
     setJobToDelete(null);
   };
-
-  const generatePaginationButtons = () => {
-    const pages = [];
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
-
-    // Adjust the start and end page if the number of pages is less than 5
-    if (totalPages <= 5) {
-      startPage = 1;
-      endPage = totalPages;
-    } else {
-      if (currentPage <= 3) {
-        endPage = 5;
-      }
-      if (currentPage >= totalPages - 2) {
-        startPage = totalPages - 4;
-      }
-    }
-
-    for (let page = startPage; page <= endPage; page++) {
-      pages.push(page);
-    }
-
-    return pages;
-  };
-
-  const paginationButtons = generatePaginationButtons();
 
   return (
     <>
@@ -154,10 +138,13 @@ export default function Home() {
             >
               + Add Jobs
             </button>
-            <button className="bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600">
+            <button
+              className="bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600"
+              onClick={handleScrapeClick}
+            >
               Scrape from Jobstreet
             </button>
-            <button className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+            <button className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600" onClick={handleExportClick}>
               Export
             </button>
           </div>
@@ -166,117 +153,27 @@ export default function Home() {
             <AddModal onClose={handleAddModalClose} onAddSuccess={fetchJobs} />
           )}
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden text-gray-900">
-              <thead className="bg-gray-300">
-                <tr>
-                  <th className="py-2 px-4 text-center">Title</th>
-                  <th className="py-2 px-4 text-center">Company Name</th>
-                  <th className="py-2 px-4 text-center">Work Type</th>
-                  <th className="py-2 px-4 text-center">Location</th>
-                  <th className="py-2 px-4 text-center">Salary</th>
-                  <th className="py-2 px-4 text-center">Listing Date</th>
-                  <th className="py-2 px-4 text-center">Keyword</th>
-                  <th className="py-2 px-4 text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-900">
-                {currentJobs.map((job, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="py-2 px-4">{job.title}</td>
-                    <td className="py-2 px-4">{job.company_name}</td>
-                    <td className="py-2 px-4">{job.work_type}</td>
-                    <td className="py-2 px-4">{job.location}</td>
-                    <td className="py-2 px-4">{job.salary}</td>
-                    <td className="py-2 px-4">{format(new Date(job.listing_date), 'yyyy-MM-dd')}</td>
-                    <td className="py-2 px-4">{job.keyword}</td>
-                    <td className="py-2 px-4 flex">
-                      <button
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                        onClick={() => handleUpdateClick(job)}
-                      >
-                        <FontAwesomeIcon icon={faEdit} />
-                      </button>
-                      <button
-                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 ml-2"
-                        onClick={() => handleDeleteClick(job)}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {jobToDelete && (
-                  <DeleteModal
-                    job={jobToDelete}
-                    onClose={handleDeleteModalClose}
-                    onDeleteSuccess={fetchJobs}
-                  />
-                )}
-                {showUpdateModal && (
-                  <UpdateModal
-                    job={jobToUpdate}
-                    onClose={handleUpdateModalClose}
-                    onUpdateSuccess={fetchJobs}
-                  />
-                )}
-              </tbody>
-            </table>
-          </div>
+          {showScrapeModal && (
+            <ScrapeModal onClose={handleScrapeModalClose} onScrapeSuccess={fetchJobs} />
+          )}
 
-          <div className="mt-6 flex justify-center">
-            <nav className="relative z-0 inline-flex items-center space-x-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              {paginationButtons.includes(1) && (
-                <button
-                  onClick={() => handlePageChange(1)}
-                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === 1 ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
-                >
-                  1
-                </button>
-              )}
-              {paginationButtons.length > 1 && paginationButtons[0] > 2 && (
-                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
-                  ...
-                </span>
-              )}
-              {paginationButtons.slice(1, -1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
-                >
-                  {page}
-                </button>
-              ))}
-              {paginationButtons.length > 1 && paginationButtons[paginationButtons.length - 1] < totalPages - 1 && (
-                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
-                  ...
-                </span>
-              )}
-              {paginationButtons.includes(totalPages) && (
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
-                >
-                  {totalPages}
-                </button>
-              )}
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </nav>
-          </div>
+          <JobTable
+            jobs={currentJobs}
+            handleUpdateClick={handleUpdateClick}
+            handleDeleteClick={handleDeleteClick}
+            jobToUpdate={jobToUpdate}
+            jobToDelete={jobToDelete}
+            handleDeleteModalClose={handleDeleteModalClose}
+            handleUpdateModalClose={handleUpdateModalClose}
+            fetchJobs={fetchJobs}
+            showUpdateModal={showUpdateModal}
+          />
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </main>
       </div>
     </>

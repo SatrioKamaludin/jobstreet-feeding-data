@@ -62,6 +62,16 @@ export const deleteJob = async (jobId) => {
   }
 };
 
+export const scrapeJob = async (location, keyword) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/scrape?keyword=${keyword}&location=${location}`);
+    return response.data;  // Return the API response data, including the success message
+  } catch (error) {
+    console.error('Error scraping jobs:', error);
+    throw error;
+  }
+};
+
 export const downloadFile = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/export`, {
