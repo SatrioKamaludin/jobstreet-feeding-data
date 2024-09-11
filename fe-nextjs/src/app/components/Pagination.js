@@ -1,4 +1,17 @@
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
+
+    const handlePrevious = () => {
+        if (currentPage > 1) {
+            onPageChange(currentPage - 1);
+        }
+    };
+
+    const handleNext = () => {
+        if (currentPage < totalPages) {
+            onPageChange(currentPage + 1);
+        }
+    };
+
     const generatePaginationButtons = () => {
         const pages = [];
         let startPage = Math.max(1, currentPage - 2);
@@ -29,49 +42,60 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
         <div className="mt-6 flex justify-center">
             <nav className="relative z-0 inline-flex items-center space-x-2">
                 <button
-                    onClick={() => onPageChange(currentPage - 1)}
+                    onClick={handlePrevious}
                     disabled={currentPage === 1}
                     className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                 >
                     Previous
                 </button>
-                {paginationButtons.includes(1) && (
+
+                {totalPages > 1 ? (
+                    <>
+                        {paginationButtons.includes(1) && (
+                            <button
+                                onClick={() => onPageChange(1)}
+                                className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === 1 ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
+                            >
+                                1
+                            </button>
+                        )}
+                        {paginationButtons.length > 1 && paginationButtons[0] > 2 && (
+                            <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
+                                ...
+                            </span>
+                        )}
+                        {paginationButtons.slice(1, -1).map(page => (
+                            <button
+                                key={page}
+                                onClick={() => onPageChange(page)}
+                                className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                        {paginationButtons.length > 1 && paginationButtons[paginationButtons.length - 1] < totalPages - 1 && (
+                            <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
+                                ...
+                            </span>
+                        )}
+                        {paginationButtons.includes(totalPages) && (
+                            <button
+                                onClick={() => onPageChange(totalPages)}
+                                className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
+                            >
+                                {totalPages}
+                            </button>
+                        )}
+                    </>
+                ) : (
                     <button
-                        onClick={() => onPageChange(1)}
-                        className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === 1 ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium bg-blue-500 text-white rounded-md shadow-sm"
                     >
                         1
                     </button>
                 )}
-                {paginationButtons.length > 1 && paginationButtons[0] > 2 && (
-                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
-                        ...
-                    </span>
-                )}
-                {paginationButtons.slice(1, -1).map(page => (
-                    <button
-                        key={page}
-                        onClick={() => onPageChange(page)}
-                        className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
-                    >
-                        {page}
-                    </button>
-                ))}
-                {paginationButtons.length > 1 && paginationButtons[paginationButtons.length - 1] < totalPages - 1 && (
-                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm">
-                        ...
-                    </span>
-                )}
-                {paginationButtons.includes(totalPages) && (
-                    <button
-                        onClick={() => onPageChange(totalPages)}
-                        className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'text-gray-500 bg-white'} rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500`}
-                    >
-                        {totalPages}
-                    </button>
-                )}
                 <button
-                    onClick={() => onPageChange(currentPage + 1)}
+                    onClick={handleNext}
                     disabled={currentPage === totalPages}
                     className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-500 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                 >
