@@ -128,58 +128,53 @@ def fetch_page_data(page, keyword, location):
     except (requests.RequestException, AttributeError, json.JSONDecodeError):
         return None
     
-def scrape_jobs(keyword, location):
+def scrape_jobs(keyword, location, page = 1):
     data_per_page = 32  # assuming each page contains 32 job listings
     total_jobs = []
     
     # Fetch data for the first page to calculate max_pages
-    data = fetch_page_data(1, keyword, location)
-    if data:
-        total_data = int(data['results']['results']['summary']['displayTotalCount'].replace(",", ""))
-        max_pages = math.ceil(total_data / data_per_page)
-    else:
+    data = fetch_page_data(page, keyword, location)
+    if not data:
         return []
     
-    for page in range(1, max_pages + 1):
-        data = fetch_page_data(page, keyword, location)
-        if data:
-            jobs = data['results']['results']['jobs']
-            for job in jobs:
-                title = job.get('title', 'No Title')
-                company_name = job.get('advertiser', {}).get('description', 'No Company Name')
-                location = job.get('location', 'No Location')
-                listing_date = job.get('listingDate', 'No Listing Date')
-                salary = job.get('salary', 'No Salary')
-                work_type = job.get('workType', 'No Work Type')
-                
-                if listing_date != 'No Listing Date':
-                    try:
-                        listing_date_obj = datetime.strptime(listing_date, "%Y-%m-%dT%H:%M:%SZ")
-                        formatted_date = listing_date_obj.strftime("%Y-%m-%d")
-                    except ValueError:
-                        formatted_date = 'Invalid Date Format'
-                else:
-                    formatted_date = 'No Listing Date'
-                    
-                Jobs.objects.update_or_create(
-                    title=title,
-                    company_name=company_name,
-                    keyword=keyword,  
-                    defaults={
-                        'work_type': work_type,
-                        'location': location,
-                        'salary': salary,
-                        'listing_date': formatted_date
-                    }
-                )
-                total_jobs.append({
-                    'title': title,
-                    'company_name': company_name,
-                    'location': location,
-                    'listing_date': formatted_date,
-                    'salary': salary,
-                    'work_type': work_type,
-                })
+    jobs = data['results']['results']['jobs']
+    
+    for job in jobs:
+        title = job.get('title', 'No Title')
+        company_name = job.get('advertiser', {}).get('description', 'No Company Name')
+        location = job.get('location', 'No Location')
+        listing_date = job.get('listingDate', 'No Listing Date')
+        salary = job.get('salary', 'No Salary')
+        work_type = job.get('workType', 'No Work Type')
+        
+        if listing_date != 'No Listing Date':
+            try:
+                listing_date_obj = datetime.strptime(listing_date, "%Y-%m-%dT%H:%M:%SZ")
+                formatted_date = listing_date_obj.strftime("%Y-%m-%d")
+            except ValueError:
+                formatted_date = 'Invalid Date Format'
+        else:
+            formatted_date = 'No Listing Date'
+            
+        Jobs.objects.update_or_create(
+            title=title,
+            company_name=company_name,
+            keyword=keyword,  
+            defaults={
+                'work_type': work_type,
+                'location': location,
+                'salary': salary,
+                'listing_date': formatted_date
+            }
+        )
+        total_jobs.append({
+            'title': title,
+            'company_name': company_name,
+            'location': location,
+            'listing_date': formatted_date,
+            'salary': salary,
+            'work_type': work_type,
+        })
     return total_jobs
 
 def export_jobs_to_excel():

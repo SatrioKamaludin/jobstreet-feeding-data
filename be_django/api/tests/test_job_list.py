@@ -5,12 +5,16 @@ from rest_framework.test import APIClient
 from django.contrib.auth.models import User
 from django.utils.dateparse import parse_datetime
 from api.models import Jobs
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def api_client():
     client = APIClient()
     user = User.objects.create_user(username='testuser', password='testpassword')
-    client.login(username='testuser', password='testpassword')
+    client.force_authenticate(user=user)
     return client
 
 @pytest.fixture
@@ -39,12 +43,19 @@ def create_jobs():
 
 @pytest.mark.django_db
 def test_get_jobs(api_client, create_jobs):
+    logger.info("Starting test: test_get_jobs")
     url = reverse('job-list')
     response = api_client.get(url, {'page_size': 10})
+    
+    logger.info(f"Response status code: {response.status_code}")
+    logger.info(f"Response data: {response.data}")
     
     assert response.status_code == status.HTTP_200_OK
     assert 'results' in response.data
     assert len(response.data['results']) == len(create_jobs)
+    
+    logger.info(f"Number of jobs in response: {len(response.data['results'])}")
+    
     assert 'count' in response.data
     assert 'totalPages' in response.data
     assert 'next' in response.data
@@ -52,6 +63,10 @@ def test_get_jobs(api_client, create_jobs):
     
     first_job = create_jobs[0]
     response_job = response.data['results'][0]
+    
+    logger.info(f"First job in mock data: {first_job.title}")
+    logger.info(f"First job in response: {response_job['title']}")
+    
     assert response_job['title'] == first_job.title
     assert response_job['company_name'] == first_job.company_name
     assert response_job['work_type'] == first_job.work_type
@@ -60,13 +75,21 @@ def test_get_jobs(api_client, create_jobs):
     
 @pytest.mark.django_db
 def test_get_jobs_with_sort(api_client, create_jobs):
+    logger.info("Starting test: test_get_jobs_with_sort")
+    
     url = reverse('job-list') + '?sort=titleAsc'
     response = api_client.get(url, {'page_size': 10})
+    
+    logger.info(f"Response status code: {response.status_code}")
+    logger.info(f"Response data: {response.data}")
     
     assert response.status_code == status.HTTP_200_OK
     
     sorted_jobs = sorted(create_jobs, key=lambda job: job.title)
     response_jobs = response.data['results']
+    
+    logger.info(f"First job in sorted mock data: {sorted_jobs[0].title}")
+    logger.info(f"First job in response: {response_jobs[0]['title']}")
     
     print("sorted_jobs:", [job.title for job in sorted_jobs])
     print("response_jobs:", [job['title'] for job in response_jobs])
@@ -76,8 +99,12 @@ def test_get_jobs_with_sort(api_client, create_jobs):
 
 @pytest.mark.django_db
 def test_get_jobs_with_search(api_client, create_jobs):
+    logger.info("Starting test: test_get_jobs_with_search")
     url = reverse('job-list') + '?search=Software'
     response = api_client.get(url, {'page_size': 10})
+    
+    logger.info(f"Response status code: {response.status_code}")
+    logger.info(f"Response data: {response.data}")
     
     assert response.status_code == status.HTTP_200_OK
     # Validate search test
@@ -86,8 +113,14 @@ def test_get_jobs_with_search(api_client, create_jobs):
     
 @pytest.mark.django_db
 def test_get_jobs_with_invalid_search(api_client):
+    logger.info("Starting test: test_get_jobs_with_invalid_search")
     url = reverse('job-list') + '?search=ab'
     response = api_client.get(url, {'page_size': 10})
     
+    logger.info(f"Response status code: {response.status_code}")
+    logger.info(f"Response data: {response.data}")
+    
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data['error'] == 'Please enter at least 3 characters to search.'
+    
+    logger.info(f"Invalid search error message: {response.data['error']}")

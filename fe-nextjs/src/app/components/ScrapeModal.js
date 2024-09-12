@@ -6,13 +6,14 @@ import { scrapeJob } from "../api/api"
 export default function ScrapeModal({ onClose, onScrapeSuccess }) {
     const [location, setLocation] = useState("")
     const [keyword, setKeyword] = useState("")
+    const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(false)
     const [scrapeSuccess, setScrapeSuccess] = useState(false)
     const [scrapMessages, setScrapMessages] = useState("")
     const [scrapeStarted, setScrapeStarted] = useState(false)
     const controllerRef = useRef(null)
 
-    const isFormValid = location && keyword;
+    const isFormValid = location && keyword && page;
 
     const handleScrape = async () => {
         setLoading(true)
@@ -22,6 +23,7 @@ export default function ScrapeModal({ onClose, onScrapeSuccess }) {
             const result = await scrapeJob(
                 location,
                 keyword,
+                page,
                 { signal: controllerRef.current.signal }
             )
             setScrapMessages(result.message)
@@ -85,6 +87,17 @@ export default function ScrapeModal({ onClose, onScrapeSuccess }) {
                                     placeholder="Enter location"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
+                                    className="flex-grow px-3 py-2 border border-gray-300 rounded-md w-60 text-black" // Consistent width for fields
+                                />
+                            </div>
+                            <div className="flex items-center mb-4">
+                                <label htmlFor="page" className="w-36 text-gray-700 font-medium mr-4 text-right">Page:</label>
+                                <input
+                                    id="page"
+                                    type="number"
+                                    placeholder="Enter page"
+                                    value={page}
+                                    onChange={(e) => setPage(e.target.value)}
                                     className="flex-grow px-3 py-2 border border-gray-300 rounded-md w-60 text-black" // Consistent width for fields
                                 />
                             </div>

@@ -98,13 +98,15 @@ class JobScrapeView(APIView):
         operation_description="Scrape jobs from Jobstreet based on keyword and location.",
         manual_parameters=[
             openapi.Parameter('keyword', openapi.IN_QUERY, description="Job keyword", type=openapi.TYPE_STRING, required=True),
-            openapi.Parameter('location', openapi.IN_QUERY, description="Job location", type=openapi.TYPE_STRING, required=True)
+            openapi.Parameter('location', openapi.IN_QUERY, description="Job location", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter('page', openapi.IN_QUERY, description="Page number to scrape", type=openapi.TYPE_INTEGER, required=True)
         ],
         responses={200: 'Jobs scraped successfully.', 400: 'Bad Request', 404: 'No jobs found.'}
     )
     def post(self, request, *args, **kwargs):
         keyword = request.GET.get('keyword', None)
         location = request.GET.get('location', None)
+        page = request.GET.get('page', 1)  # Default page is 1
             
         if not keyword:
             return Response({"error": "Keyword is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -112,13 +114,18 @@ class JobScrapeView(APIView):
         if not location:
             return Response({"error": "Location is required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        jobs = scrape_jobs(keyword, location)
+        try:
+            page = int(page)
+        except ValueError:
+            return Response({"error": "Page number must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        jobs = scrape_jobs(keyword, location, page)
         
         if not jobs:
             return Response({"message": "No jobs found or there was an issue with scraping."}, status=status.HTTP_404_NOT_FOUND)
         
         return Response({
-            "message": f"Successfully scraped {len(jobs)} jobs for keyword: {keyword}",
+            "message": f"Successfully scraped {len(jobs)} jobs for keyword: {keyword} with location: {location} and page: {page}.",
             "data": jobs
         }, status=status.HTTP_200_OK)
     
