@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from 'react';
 import { downloadFile, getJobs } from './api/api';
-import Header from './components/Header';
 import AddModal from './components/AddModal';
 import Pagination from './components/Pagination';
 import JobTable from './components/JobTable';
@@ -58,16 +57,8 @@ export default function Home() {
     setShowAddModal(true);
   };
 
-  const handleAddModalClose = () => {
-    setShowAddModal(false);
-  };
-
   const handleScrapeClick = () => {
     setShowScrapeModal(true);
-  };
-
-  const handleScrapeModalClose = () => {
-    setShowScrapeModal(false);
   };
 
   const handleExportClick = () => {
@@ -79,15 +70,15 @@ export default function Home() {
     setShowUpdateModal(true);
   };
 
-  const handleUpdateModalClose = () => {
-    setShowUpdateModal(false);
-  };
-
   const handleDeleteClick = (job) => {
     setJobToDelete(job);
   };
 
-  const handleDeleteModalClose = () => {
+  const handleModalClose = () => {
+    fetchJobs();
+    setShowAddModal(false);
+    setShowUpdateModal(false);
+    setShowScrapeModal(false);
     setJobToDelete(null);
   };
 
@@ -150,11 +141,11 @@ export default function Home() {
           </div>
 
           {showAddModal && (
-            <AddModal onClose={handleAddModalClose} onAddSuccess={fetchJobs} />
+            <AddModal onClose={handleModalClose} onAddSuccess={fetchJobs} />
           )}
 
           {showScrapeModal && (
-            <ScrapeModal onClose={handleScrapeModalClose} onScrapeSuccess={fetchJobs} />
+            <ScrapeModal onClose={handleModalClose} onScrapeSuccess={fetchJobs} />
           )}
 
           <JobTable
@@ -163,8 +154,8 @@ export default function Home() {
             handleDeleteClick={handleDeleteClick}
             jobToUpdate={jobToUpdate}
             jobToDelete={jobToDelete}
-            handleDeleteModalClose={handleDeleteModalClose}
-            handleUpdateModalClose={handleUpdateModalClose}
+            handleDeleteModalClose={handleModalClose}
+            handleUpdateModalClose={handleModalClose}
             fetchJobs={fetchJobs}
             showUpdateModal={showUpdateModal}
           />

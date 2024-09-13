@@ -34,3 +34,151 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+```
+fe-nextjs
+├─ .eslintrc.json
+├─ .gitignore
+├─ jsconfig.json
+├─ next.config.mjs
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ public
+│  ├─ next.svg
+│  └─ vercel.svg
+├─ README.md
+├─ src
+│  └─ app
+│     ├─ api
+│     │  └─ api.js
+│     ├─ components
+│     │  ├─ AddModal.js
+│     │  ├─ DeleteModal.js
+│     │  ├─ Header.js
+│     │  ├─ JobTable.js
+│     │  ├─ Pagination.js
+│     │  ├─ ScrapeModal.js
+│     │  └─ UpdateModal.js
+│     ├─ favicon.ico
+│     ├─ globals.css
+│     ├─ layout.js
+│     └─ page.js
+├─ tailwind.config.js
+└─ __tests__
+
+```
+```
+fe-nextjs
+├─ .babelrc
+├─ .eslintrc.json
+├─ .gitignore
+├─ jest.config.js
+├─ jest.setup.js
+├─ jsconfig.json
+├─ next.config.mjs
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ public
+│  ├─ next.svg
+│  └─ vercel.svg
+├─ README.md
+├─ src
+│  └─ app
+│     ├─ api
+│     │  └─ api.js
+│     ├─ components
+│     │  ├─ AddModal.js
+│     │  ├─ AddModal.test.js
+│     │  ├─ DeleteModal.js
+│     │  ├─ Header.js
+│     │  ├─ JobTable.js
+│     │  ├─ Pagination.js
+│     │  ├─ ScrapeModal.js
+│     │  └─ UpdateModal.js
+│     ├─ favicon.ico
+│     ├─ globals.css
+│     ├─ layout.js
+│     ├─ layout.test.js
+│     ├─ page.js
+│     └─ page.test.js
+└─ tailwind.config.js
+
+```
+```
+fe-nextjs
+├─ .babelrc
+├─ .eslintrc.json
+├─ .gitignore
+├─ jest.config.js
+├─ jest.setup.js
+├─ jsconfig.json
+├─ next.config.mjs
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ public
+│  ├─ next.svg
+│  └─ vercel.svg
+├─ README.md
+├─ src
+│  └─ app
+│     ├─ api
+│     │  └─ api.js
+│     ├─ components
+│     │  ├─ AddModal.js
+│     │  ├─ AddModal.test.js
+│     │  ├─ DeleteModal.js
+│     │  ├─ Header.js
+│     │  ├─ JobTable.js
+│     │  ├─ Pagination.js
+│     │  ├─ ScrapeModal.js
+│     │  └─ UpdateModal.js
+│     ├─ favicon.ico
+│     ├─ globals.css
+│     ├─ layout.js
+│     ├─ layout.test.js
+│     ├─ page.js
+│     └─ page.test.js
+└─ tailwind.config.js
+
+```
+```
+fe-nextjs
+├─ .babelrc
+├─ .eslintrc.json
+├─ .gitignore
+├─ jest.config.js
+├─ jest.setup.js
+├─ jsconfig.json
+├─ next.config.mjs
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ public
+│  ├─ next.svg
+│  └─ vercel.svg
+├─ README.md
+├─ src
+│  └─ app
+│     ├─ api
+│     │  └─ api.js
+│     ├─ components
+│     │  ├─ AddModal.js
+│     │  ├─ AddModal.test.js
+│     │  ├─ DeleteModal.js
+│     │  ├─ Header.js
+│     │  ├─ JobTable.js
+│     │  ├─ Pagination.js
+│     │  ├─ ScrapeModal.js
+│     │  └─ UpdateModal.js
+│     ├─ favicon.ico
+│     ├─ globals.css
+│     ├─ layout.js
+│     ├─ layout.test.js
+│     ├─ page.js
+│     └─ page.test.js
+└─ tailwind.config.js
+
+```
