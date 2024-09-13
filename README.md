@@ -15,23 +15,23 @@ How to setup project:
 3. Clone this repository
 4. Backend Setup
 
-   2a. Go to be_django folder (cd be_django)
+   4a. Go to be_django folder (cd be_django)
 
-   2b. Run command "python -m venv .venv" to create virtual environemnt
+   4b. Run command "python -m venv .venv" to create virtual environemnt
 
-   2c. Run command "pip install -r requirements.txt" to install scripts and libraries
+   4c. Run command "pip install -r requirements.txt" to install scripts and libraries
 
-   2d. Open settings.py and configure database using your postgreSQL configurations
+   4d. Open settings.py and configure database using your postgreSQL configurations
 
    ![image](https://github.com/user-attachments/assets/c8d257d5-1a1a-4072-9a27-4367650b3ac8)
 
-   2e. Run command "python manage.py migrate" to migrate main app
+   4e. Run command "python manage.py migrate" to migrate main app
 
-   2f. Run command "python manage.py makemigrations api" to make migrations for api folder, which contains model and main APIs 
+   4f. Run command "python manage.py makemigrations api" to make migrations for api folder, which contains model and main APIs 
 
-   2g. Run command "pythin manage.py migrate api" to migrate api folder
+   4g. Run command "pythin manage.py migrate api" to migrate api folder
 
-   2h. Run command "python manage.py runserver" to run the server
+   4h. Run command "python manage.py runserver" to run the server
 
 5. Using API in Postman
    ![image](https://github.com/user-attachments/assets/6827fadf-c626-4695-8901-36ff5ea1fb42)
