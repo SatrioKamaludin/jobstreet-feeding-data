@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 @pytest.fixture
 def api_client():
     client = APIClient()
-    user = User.objects.create_user(username='testuser', password='testpassword')
-    client.force_authenticate(user=user)
+    user = User.objects.create_superuser(username='testuser', password='testpassword', email='test@example.com')
+    client.login(username='testuser', password='testpassword')
     return client
 
 @pytest.fixture
