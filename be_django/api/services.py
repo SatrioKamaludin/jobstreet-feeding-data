@@ -207,5 +207,3 @@ def export_jobs_to_excel():
     response['Content-Disposition'] = 'attachment; filename=jobs_export.xls'
     workbook.save(response)
     return response
-
-    
