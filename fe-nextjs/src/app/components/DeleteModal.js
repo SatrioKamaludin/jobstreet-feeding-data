@@ -20,7 +20,7 @@ export default function DeleteModal({ job, onClose, onDeleteSuccess }) {
         }
     }
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div role="dialog" className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg">
                 {deleted ? (
                     <div className="flex flex-col items-center">

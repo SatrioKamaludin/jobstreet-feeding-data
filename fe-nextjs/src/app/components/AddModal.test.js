@@ -1,10 +1,13 @@
 import { render, fireEvent, screen } from "@testing-library/react";
 import AddModal from "./AddModal";
+import { addJob } from "../api/api";
+
+jest.mock("../api/api");
+
+const mockOnClose = jest.fn();
+const mockAddOnSuccess = jest.fn();
 
 describe("AddModal", () => {
-    const mockOnClose = jest.fn();
-    const mockAddOnSuccess = jest.fn();
-
     test("renders correctly", () => {
         render(
             <AddModal
@@ -35,7 +38,7 @@ describe("AddModal", () => {
     });
 
     test("Calls handleAdd when Add is Clicked", async () => {
-        render(<AddModal onClose={mockOnClose} onAddSuccess={mockOnAddSuccess} />);
+        render(<AddModal onClose={mockOnClose} onAddSuccess={mockAddOnSuccess} />);
         const title = screen.getByLabelText(/Title:/i);
         const companyName = screen.getByLabelText(/Company Name:/i);
         const location = screen.getByLabelText(/Location:/i);
@@ -43,12 +46,14 @@ describe("AddModal", () => {
         const workType = screen.getByLabelText(/Work Type:/i);
         const keyword = screen.getByLabelText(/Keyword:/i);
         const addButton = screen.getByText(/Add/i);
+        
         fireEvent.change(title, { target: { value: "Test Title" } });
         fireEvent.change(companyName, { target: { value: "Test Company Name" } });
         fireEvent.change(location, { target: { value: "Test Location" } });
         fireEvent.change(salary, { target: { value: "Test Salary" } });
         fireEvent.change(workType, { target: { value: "Test Work Type" } });
         fireEvent.change(keyword, { target: { value: "Test Keyword" } });
+
         fireEvent.click(addButton);
 
         expect(mockAddOnSuccess).toHaveBeenCalled();
