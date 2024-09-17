@@ -57,9 +57,3 @@ How to setup project:
    ![image](https://github.com/user-attachments/assets/85d73abe-4672-4d23-8af4-9e6ac80eba3b)
 
 For Unit Test Results, you can find Readme.md in each Repository to check the unit test summaries (Both Backend and Frontend)
-
-FE Unit Tests results:
-via run "npm test"
-![image](https://github.com/user-attachments/assets/a2cd64a4-8e3b-453a-b48c-810490c9c321)
-
-
