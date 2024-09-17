@@ -68,3 +68,7 @@ fe-nextjs
 └─ __tests__
 
 ```
+
+Unit Test Results:
+
+![image](https://github.com/user-attachments/assets/e41e7ae1-2896-4c0f-99ef-569334bbe021)
