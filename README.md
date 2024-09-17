@@ -56,9 +56,7 @@ How to setup project:
 
    ![image](https://github.com/user-attachments/assets/85d73abe-4672-4d23-8af4-9e6ac80eba3b)
 
-BE Unit Tests results:
-vai run pytest
-![image](https://github.com/user-attachments/assets/77587881-4e13-46f9-8303-167183c3e837)
+For Unit Test Results, you can find Readme.md in each Repository to check the unit test summaries (Both Backend and Frontend)
 
 FE Unit Tests results:
 via run "npm test"
